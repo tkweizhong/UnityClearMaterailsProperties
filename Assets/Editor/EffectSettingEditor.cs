@@ -69,7 +69,7 @@ public class EffectSettingEditor
         {
             EditorUtility.DisplayProgressBar("Cleanup...", mats[i].name, i / mats.Length);
             Material mat = mats[i] as Material;
-            if (mat)
+            if (mat != null)
             {
                 SerializedObject psSource = new SerializedObject(mat);
                 SerializedProperty emissionProperty = psSource.FindProperty("m_SavedProperties");
@@ -90,12 +90,11 @@ public class EffectSettingEditor
         }
         AssetDatabase.SaveAssets();
         EditorUtility.ClearProgressBar();
-
     }
 
     private static bool CleanMaterialSerializedProperty(SerializedProperty property, Material mat)
     {
-        bool res = false;
+        bool isDirty = false;
         for (int j = property.arraySize - 1; j >= 0; --j)
         {
             SerializedProperty serializedProperty = property.GetArrayElementAtIndex(j);
@@ -111,18 +110,18 @@ public class EffectSettingEditor
                     if (textureRefrences != null && textureRefrences.objectReferenceValue != null)
                     {
                         textureRefrences.objectReferenceValue = null;
-                        res = true;
+                        isDirty = true;
                     }
                 }
                 else
                 {
                     property.DeleteArrayElementAtIndex(j);
                     Debug.LogWarning("Delete legacy property in serialized object:" + propertyName);
-                    res = true;
+                    isDirty = true;
                 }
             }
         }
-        return res;
+        return isDirty;
     }
 }
 
